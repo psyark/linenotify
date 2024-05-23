@@ -2,7 +2,6 @@ package linenotify
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -47,19 +46,31 @@ func Notify(ctx context.Context, token string, message string, options ...notify
 
 	defer resp.Body.Close()
 
-	var nr notifyResponse
-	if err := json.NewDecoder(req.Body).Decode(&nr); err != nil {
-		return err
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("status=%d", resp.StatusCode)
 	}
 
-	if nr.Status != 200 {
-		return fmt.Errorf("status=%d, message=%s", nr.Status, nr.Message)
-	}
+	// https://notify-bot.line.me/doc/ja/
+	// レスポンス本文がドキュメントにはあるけど実際には返されない？
+
+	// data, err := io.ReadAll(req.Body)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// var nr notifyResponse
+	// if err := json.Unmarshal(data, &nr); err != nil {
+	// 	return fmt.Errorf("%w: %q", err, string(data))
+	// }
+
+	// if nr.Status != 200 {
+	// 	return fmt.Errorf("status=%d, message=%s", nr.Status, nr.Message)
+	// }
 
 	return nil
 }
 
-type notifyResponse struct {
-	Status  int    `json:"status"`
-	Message string `json:"message"`
-}
+// type notifyResponse struct {
+// 	Status  int    `json:"status"`
+// 	Message string `json:"message"`
+// }
